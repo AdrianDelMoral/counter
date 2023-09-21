@@ -3,30 +3,17 @@ import './App.css'
 import { UserCard } from './components/UserCard'
 import { removeAccents } from './utils.js'
 
-const initialUsers = []
-
 function App () {
-  const [age, setAge] = useState(15)
+  const [age, setAge] = useState('')
   const [name, setName] = useState('')
-  const [userList, setUserList] = useState(initialUsers)
-  const [errorIsVisible, setErrorIsVisible] = useState('hidden')
+  const [userList, setUserList] = useState([])
   const [errorText, setErrorText] = useState('')
-
-  function ageChange (age) { // recibimos la variable
-    setAge(age.target.value) // seteamos el nombre que recibimos
-  }
-
-  function nameChange (name) { // recibimos la variable
-    setName(name.target.value) // seteamos el nombre que recibimos
-  }
 
   function addUser (name, age) {
     if (name === '') {
-      setErrorIsVisible('show')
       setErrorText('El nombre no puede estar vacio')
       return
     }
-    setErrorIsVisible('hidden')
     const newUserList = [...userList]
     const nameUpdated = removeAccents(name.toLowerCase())
     const userId = nameUpdated + age
@@ -34,18 +21,26 @@ function App () {
     const isAlreadyAdded = newUserList.some(user => user.id === userId)
 
     if (isAlreadyAdded) {
-      setErrorIsVisible('show')
       setErrorText('El usuario ya existe')
       return
     }
-    setErrorIsVisible('hidden')
     newUserList.push({
       id: userId,
       name,
       age
     })
     setUserList(newUserList)
-    setName('') // vacia el input name
+    handleResetForm()
+  }
+
+  const handleResetForm = () => {
+    setName('') // resetea el input name
+    setAge(15) // resetea el input age
+    setErrorText('') // elimina el error
+  }
+
+  const getErrorClassName = () => {
+    return errorText === '' ? 'hidden' : 'show'
   }
 
   return (
@@ -63,7 +58,7 @@ function App () {
             type='text'
             name='name'
             value={name}
-            onChange={nameChange}
+            onChange={(event) => setName(event.target.value)}
           />
         </div>
 
@@ -71,13 +66,13 @@ function App () {
           <label>Edad:</label>
           <input
             autoComplete='age'
-            type='number'
-            name='age'
+            type='text'
+            age='age'
             value={age}
-            onChange={ageChange}
+            onChange={(event) => setAge(event.target.value)}
           />
         </div>
-        <span className={errorIsVisible}>{errorText}</span>
+        <span className={getErrorClassName()}>{errorText}</span>
       </form>
 
       <div>
