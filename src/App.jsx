@@ -9,6 +9,8 @@ function App () {
   const [age, setAge] = useState(15)
   const [name, setName] = useState('')
   const [userList, setUserList] = useState(initialUsers)
+  const [errorIsVisible, setErrorIsVisible] = useState('hidden')
+  const [errorText, setErrorText] = useState('')
 
   function ageChange (age) { // recibimos la variable
     setAge(age.target.value) // seteamos el nombre que recibimos
@@ -19,23 +21,31 @@ function App () {
   }
 
   function addUser (name, age) {
-    if (name !== '') { // comprueba si el name está vacio
-      const newUserList = [...userList]
-      const nameUpdated = removeAccents(name.toLowerCase())
-      const userId = nameUpdated + age
-
-      const isAlreadyAdded = newUserList.some(user => user.id === userId)
-
-      if (!isAlreadyAdded) { // si no existe el usuario, dejará crearlo
-        newUserList.push({
-          id: userId,
-          name,
-          age
-        })
-        setUserList(newUserList)
-        setName('') // vacia el input name
-      }
+    if (name === '') {
+      setErrorIsVisible('show')
+      setErrorText('El nombre no puede estar vacio')
+      return
     }
+    setErrorIsVisible('hidden')
+    const newUserList = [...userList]
+    const nameUpdated = removeAccents(name.toLowerCase())
+    const userId = nameUpdated + age
+
+    const isAlreadyAdded = newUserList.some(user => user.id === userId)
+
+    if (isAlreadyAdded) {
+      setErrorIsVisible('show')
+      setErrorText('El usuario ya existe')
+      return
+    }
+    setErrorIsVisible('hidden')
+    newUserList.push({
+      id: userId,
+      name,
+      age
+    })
+    setUserList(newUserList)
+    setName('') // vacia el input name
   }
 
   return (
@@ -46,25 +56,28 @@ function App () {
           y en el onChange cada vez que cambie usaremos esa función
       */}
       <form>
-        <label>Nombre:</label>
-        <input
-          autoComplete='name'
-          type='text'
-          name='name'
-          value={name}
-          onChange={nameChange}
-        />
+        <div>
+          <label>Nombre:</label>
+          <input
+            autoComplete='name'
+            type='text'
+            name='name'
+            value={name}
+            onChange={nameChange}
+          />
+        </div>
 
-        <br />
-
-        <label>Edad:</label>
-        <input
-          autoComplete='age'
-          type='number'
-          name='age'
-          value={age}
-          onChange={ageChange}
-        />
+        <div>
+          <label>Edad:</label>
+          <input
+            autoComplete='age'
+            type='number'
+            name='age'
+            value={age}
+            onChange={ageChange}
+          />
+        </div>
+        <span className={errorIsVisible}>{errorText}</span>
       </form>
 
       <div>
@@ -76,12 +89,13 @@ function App () {
           Crear Usuario
         </button>
       </div>
-
-      {
-        userList.map((user) =>
-          <UserCard key={user.id} user={user} />
-        )
-      }
+      <div className='usersList'>
+        {
+          userList.map((user) =>
+            <UserCard key={user.id} user={user} />
+          )
+        }
+      </div>
     </section>
   )
 }
